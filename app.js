@@ -5,32 +5,63 @@ const date = require(__dirname + "/date.js");
 
 const app = express();
 
-app.set('view engine', 'ejs');
+app.set("view engine", "ejs");
 
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 // const items = ["Buy Food", "Cook Food", "Eat Food"];
 // const workItems = [];
 
-mongoose.connect("/127.0.0.1:27017/todolistDB");
+mongoose.connect("mongodb://127.0.0.1:27017/todolistDB");
 
 const itemsSchema = {
-  name: String
+  name: String,
 };
 
-const item = mongoose.model('item', itemsSchema);
+const Item = mongoose.model("Item", itemsSchema);
 
-app.get("/", function(req, res) {
+const item1 = new Item({ name: "Wake Up" });
+const item2 = new Item({ name: "Brush Teeth" });
+const item3 = new Item({ name: "Eat Food" });
 
-const day = date.getDate();
+const defautItems = [item1, item2, item3];
 
-  res.render("list", {listTitle: day, newListItems: items});
 
+app.get("/", function (req, res) {
+  // const day = date.getDate();
+  Item.find({})
+    .then((foundItems) => {
+      if (foundItems == 0){
+        Item.insertMany(defautItems)
+  .then(() => {
+    console.log("Items Inserted");
+  })
+  .catch((err) => {
+    console.log(err);
+    
+  });
+  res.redirect('/');
+      }
+      else {res.render("list", { listTitle: "Today", newListItems: foundItems });
+    }
+      })
+    .catch((err) => {
+      console.log(err);
+    });
+
+    // try {
+    //   const foundItems = Item.find({});
+    //   console.log(foundItems);
+    // } catch (err) {
+    //   console.log(err);
+    // }
+    
+
+ 
 });
 
-app.post("/", function(req, res){
-
+app.post("/", function (req, res) {
   const item = req.body.newItem;
 
   if (req.body.list === "Work") {
@@ -42,14 +73,14 @@ app.post("/", function(req, res){
   }
 });
 
-app.get("/work", function(req,res){
-  res.render("list", {listTitle: "Work List", newListItems: workItems});
+app.get("/work", function (req, res) {
+  res.render("list", { listTitle: "Work List", newListItems: workItems });
 });
 
-app.get("/about", function(req, res){
+app.get("/about", function (req, res) {
   res.render("about");
 });
 
-app.listen(3000, function() {
+app.listen(3000, function () {
   console.log("Server started on port 3000");
 });

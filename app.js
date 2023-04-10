@@ -27,50 +27,52 @@ const item3 = new Item({ name: "Eat Food" });
 
 const defautItems = [item1, item2, item3];
 
-
 app.get("/", function (req, res) {
   // const day = date.getDate();
   Item.find({})
     .then((foundItems) => {
-      if (foundItems == 0){
+      if (foundItems == 0) {
         Item.insertMany(defautItems)
-  .then(() => {
-    console.log("Items Inserted");
-  })
-  .catch((err) => {
-    console.log(err);
-    
-  });
-  res.redirect('/');
+          .then(() => {
+            console.log("Items Inserted");
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+        res.redirect("/");
+      } else {
+        res.render("list", { listTitle: "Today", newListItems: foundItems });
       }
-      else {res.render("list", { listTitle: "Today", newListItems: foundItems });
-    }
-      })
+    })
     .catch((err) => {
       console.log(err);
     });
 
-    // try {
-    //   const foundItems = Item.find({});
-    //   console.log(foundItems);
-    // } catch (err) {
-    //   console.log(err);
-    // }
-    
-
- 
+  // try {
+  //   const foundItems = Item.find({});
+  //   console.log(foundItems);
+  // } catch (err) {
+  //   console.log(err);
+  // }
 });
 
 app.post("/", function (req, res) {
-  const item = req.body.newItem;
+  const itemName = req.body.newItem;
 
-  if (req.body.list === "Work") {
-    workItems.push(item);
-    res.redirect("/work");
-  } else {
-    items.push(item);
-    res.redirect("/");
-  }
+  const item = new Item({
+    name: itemName,
+  });
+
+  item.save();
+  res.redirect("/");
+
+  // if (req.body.list === "Work") {
+  //   workItems.push(item);
+  //   res.redirect("/work");
+  // } else {
+  //   items.push(item);
+  //   res.redirect("/");
+  // }
 });
 
 app.get("/work", function (req, res) {
